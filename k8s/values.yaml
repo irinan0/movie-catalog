@@ -1,0 +1,19 @@
+﻿backend:
+  replicaCount: 1
+  image:
+    repository: movie-catalog-backend
+    tag: latest
+    pullPolicy: IfNotPresent
+  service:
+    port: 8000
+    targetPort: 8000
+
+frontend:
+  replicaCount: 1
+  image:
+    repository: movie-catalog-frontend
+    tag: latest
+    pullPolicy: IfNotPresent
+  service:
+    port: 80
+    targetPort: 80
