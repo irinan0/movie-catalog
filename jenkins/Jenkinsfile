@@ -1,0 +1,59 @@
+pipeline {
+    agent any
+
+    environment {
+        DOCKER_USER = 'irinan0'
+        DOCKER_CREDENTIALS_ID = 'dockerhub-credentials'
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                echo 'Checking out code from Git...'
+                checkout scm
+            }
+        }
+
+        stage('Build & Push Backend') {
+            steps {
+                echo 'Building backend Docker image...'
+                script {
+                    appBackend = docker.build("${env.DOCKER_USER}/movie-catalog-backend:latest", "./backend")
+                    
+                    docker.withRegistry('https://registry.hub.docker.com', env.DOCKER_CREDENTIALS_ID) {
+                        appBackend.push()
+                    }
+                }
+            }
+        }
+
+        stage('Build & Push Frontend') {
+            steps {
+                echo 'Building frontend Docker image...'
+                script {
+                    appFrontend = docker.build("${env.DOCKER_USER}/movie-catalog-frontend:latest", "./frontend")
+                    
+                    docker.withRegistry('https://registry.hub.docker.com', env.DOCKER_CREDENTIALS_ID) {
+                        appFrontend.push()
+                    }
+                }
+            }
+        }
+
+        stage('Deploy to Kubernetes') {
+            steps {
+                echo 'Applying Kubernetes manifests to EKS cluster...'
+                sh 'kubectl apply -f k8s/templates/'
+            }
+        }
+    }
+
+    post {
+        success {
+            echo 'Pipeline completed successfully! Application deployed.'
+        }
+        failure {
+            echo 'Pipeline failed. Check logs for details.'
+        }
+    }
+}

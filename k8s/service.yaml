@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: movie-catalog-lb
+  annotations:
+    service.beta.kubernetes.io/aws-load-balancer-type: "external"
+    service.beta.kubernetes.io/aws-load-balancer-nlb-target-type: "instance"
+    service.beta.kubernetes.io/aws-load-balancer-scheme: "internet-facing"
+    service.beta.kubernetes.io/aws-load-balancer-eip-allocations: "eipalloc-0e75e140c404e5762,eipalloc-0fb33148e19ddf905"
+    service.beta.kubernetes.io/aws-load-balancer-subnets: "subnet-0d0fee6f10fafe97b, subnet-0e76e3a897fde5223"
+spec:
+  type: LoadBalancer
+  selector:
+    app: movie-catalog
+  ports:
+    - port: 80
+      targetPort: 80
